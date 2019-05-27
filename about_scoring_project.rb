@@ -30,28 +30,67 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 # Your goal is to write the score method.
 
 def score(dice)
-  # You need to write this method
-  #--
-  result = 0
-  (1..6).each do |face|
-    count = dice.select { |n| n == face }.size
-    while count > 0
-      if count >= 3
-        result += (face == 1) ? 1000 : 100 * face
-        count -= 3
-      elsif face == 5
-        result += count * 50
-        count = 0
-      elsif face == 1
-        result += count * 100
-        count = 0
-      else
-        count = 0
+  total = 0
+  # Look for sets
+  (1..6).each do |value|
+    # calc_set will remove dice that are part of the set, so break when necessary
+    break if dice.size <= 2
+    total = calc_set(dice, value)
+  end
+
+  # Add in single values if necessary
+  total += calc_single(dice) if dice.size > 0
+
+  total
+end
+
+def calc_set(dice, value)
+  # There is a set with three of a kind
+  if dice.count(value) == 3
+    dice.delete(value)
+    value == 1 ? 1000 : value * 100
+
+  # There is a set with 4 or 5 of a kind
+  elsif dice.count(value) > 3
+
+    # Remove only three of the matching values from the dice array
+    counter = 0
+    dice.map! do |item|
+      break if counter == 3
+      if item == value
+        counter = counter + 1
+        # put nothing in the array for this matching element
+        nil
+      elsif
+        # keep the dice value in the array
+        value
       end
+      # Only remove the first three matches of the set
+    end
+    dice.compact!
+    value == 1 ? 1000 : value * 100
+  else
+    0
+  end
+end
+
+def calc_single(dice)
+  values = dice.map do |item|
+    if item == 1
+      100
+    elsif item == 5
+      50
+    else
+      0
     end
   end
-  result
-  #++
+
+  total = 0
+  values.each do |value|
+    total += value
+  end
+
+  total
 end
 
 class AboutScoringProject < Neo::Koan
